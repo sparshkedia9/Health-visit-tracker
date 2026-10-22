@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Reports</h1>
+  <a class="button secondary" href="/reports/export.csv?{{ request.url.query }}">Export CSV</a>
+</div>
+
+<form class="card filters" method="get" action="/reports">
+  <div>
+    <label for="date_from">From</label>
+    <input id="date_from" name="date_from" type="date" value="{{ filters.date_from }}">
+  </div>
+  <div>
+    <label for="date_to">To</label>
+    <input id="date_to" name="date_to" type="date" value="{{ filters.date_to }}">
+  </div>
+  <div>
+    <label for="household_id">Household</label>
+    <select id="household_id" name="household_id">
+      <option value="">All households</option>
+      {% for h in households %}
+      <option value="{{ h.id }}" {{ 'selected' if filters.household_id == h.id | string }}>{{ h.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div>
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      <option value="">All statuses</option>
+      {% for s in visit_statuses %}
+      <option value="{{ s }}" {{ 'selected' if filters.status == s }}>{{ s | capitalize }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="filter-actions">
+    <button type="submit" class="button">Apply</button>
+    <a href="/reports">Reset</a>
+  </div>
+</form>
+
+<section class="stats">
+  <div class="stat"><span class="stat-value">{{ summary.total }}</span><span class="stat-label">Visits</span></div>
+  <div class="stat"><span class="stat-value">{{ summary.completed }}</span><span class="stat-label">Completed ({{ summary.completion_rate }}%)</span></div>
+  <div class="stat"><span class="stat-value">{{ summary.scheduled }}</span><span class="stat-label">Still scheduled</span></div>
+  <div class="stat"><span class="stat-value">{{ summary.missed }}</span><span class="stat-label">Missed</span></div>
+  <div class="stat"><span class="stat-value">{{ summary.follow_ups_pending }}</span><span class="stat-label">Follow-ups pending</span></div>
+  <div class="stat"><span class="stat-value">{{ summary.follow_ups_overdue }}</span><span class="stat-label">Follow-ups overdue</span></div>
+  <div class="stat"><span class="stat-value">{{ summary.follow_ups_completed }}</span><span class="stat-label">Follow-ups done</span></div>
+</section>
+
+<section class="card">
+  <h2>Matching visits</h2>
+  {{ ui.visit_table(visits, empty="No visits match these filters.") }}
+</section>
+{% endblock %}

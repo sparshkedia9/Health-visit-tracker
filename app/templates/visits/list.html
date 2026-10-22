@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Visits{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Visits</h1>
+  <a class="button" href="/visits/new">Schedule visit</a>
+</div>
+
+<nav class="tabs" aria-label="Filter by status">
+  <a href="/visits" class="{{ 'active' if not status }}">All</a>
+  {% for s in visit_statuses %}
+  <a href="/visits?status={{ s }}" class="{{ 'active' if status == s }}">{{ s | capitalize }}</a>
+  {% endfor %}
+</nav>
+
+<section class="card">
+  {{ ui.visit_table(visits, empty="No visits found.", action_url="/visits/new", action_text="Schedule a visit") }}
+</section>
+{% endblock %}

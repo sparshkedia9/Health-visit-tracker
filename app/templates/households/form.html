@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui %}
+{% set editing = household is not none %}
+{% block title %}{{ "Edit household" if editing else "New household" }}{% endblock %}
+{% block content %}
+{% if editing %}
+<a class="back-link" href="/households/{{ household.id }}">← {{ household.name }}</a>
+{% else %}
+<a class="back-link" href="/households">← All households</a>
+{% endif %}
+<div class="page-header">
+  <h1>{{ "Edit household" if editing else "New household" }}</h1>
+</div>
+
+<form class="card form" method="post" action="{{ '/households/%d/edit' % household.id if editing else '/households/new' }}">
+  {% if errors %}<p class="form-error">Please fix the highlighted fields.</p>{% endif %}
+
+  <label for="name">Household name</label>
+  <input id="name" name="name" value="{{ form.name }}" required maxlength="120" placeholder="e.g. Sharma family">
+  {{ ui.field_error(errors, "name") }}
+
+  <label for="contact_number">Contact number</label>
+  <input id="contact_number" name="contact_number" type="tel" value="{{ form.contact_number }}" required maxlength="20" placeholder="e.g. +91 98765 43210">
+  {{ ui.field_error(errors, "contact_number") }}
+
+  <label for="address">Address</label>
+  <textarea id="address" name="address" rows="2" required maxlength="255">{{ form.address }}</textarea>
+  {{ ui.field_error(errors, "address") }}
+
+  <label for="location">Location <span class="muted">(village / ward / landmark or GPS coordinates)</span></label>
+  <input id="location" name="location" value="{{ form.location }}" maxlength="120" placeholder="e.g. Ward 4, near primary school">
+  {{ ui.field_error(errors, "location") }}
+
+  <div class="form-actions">
+    <button type="submit" class="button">{{ "Save changes" if editing else "Add household" }}</button>
+    <a href="{{ '/households/%d' % household.id if editing else '/households' }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

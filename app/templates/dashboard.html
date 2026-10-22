@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <h1>Dashboard</h1>
+  <div class="header-actions">
+    <a class="button secondary" href="/households/new">Add household</a>
+    <a class="button" href="/visits/new">Schedule visit</a>
+  </div>
+</div>
+
+<section class="stats">
+  <a class="stat" href="/households"><span class="stat-value">{{ stats.households }}</span><span class="stat-label">Households</span></a>
+  <div class="stat"><span class="stat-value">{{ stats.today }}</span><span class="stat-label">Visits today</span></div>
+  <a class="stat" href="/visits?status=completed"><span class="stat-value">{{ stats.completed }}</span><span class="stat-label">Completed visits</span></a>
+  <a class="stat" href="/visits?status=missed"><span class="stat-value">{{ stats.missed }}</span><span class="stat-label">Missed visits</span></a>
+  <div class="stat"><span class="stat-value">{{ stats.pending_follow_ups }}</span><span class="stat-label">Pending follow-ups</span></div>
+</section>
+
+<section class="card">
+  <h2>Today's visits</h2>
+  {{ ui.visit_table(todays_visits, show_update=True, empty="No visits scheduled for today.", action_url="/visits/new", action_text="Schedule a visit") }}
+</section>
+
+<div class="two-col">
+  <section class="card">
+    <h2>Upcoming visits</h2>
+    {{ ui.visit_table(upcoming_visits, empty="No upcoming visits scheduled.", action_url="/visits/new", action_text="Schedule a visit") }}
+  </section>
+
+  <section class="card">
+    <h2>Pending follow-ups</h2>
+    {% if follow_ups %}
+    <ul class="simple-list">
+      {% for visit in follow_ups %}
+      <li>
+        <a href="/visits/{{ visit.id }}">{{ visit.household.name }}</a>
+        <span>{{ visit.follow_up_date | date }} {{ ui.badge(visit.follow_up_state) }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">No pending follow-ups.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
