@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui %}
+{% block title %}{{ household.name }}{% endblock %}
+{% block content %}
+<a class="back-link" href="/households">← All households</a>
+<div class="page-header">
+  <h1>{{ household.name }}</h1>
+  <div class="header-actions">
+    <a class="button secondary" href="/households/{{ household.id }}/edit">Edit</a>
+    <a class="button" href="/visits/new?household_id={{ household.id }}">Schedule visit</a>
+  </div>
+</div>
+
+<section class="card">
+  <dl class="details">
+    <dt>Contact number</dt><dd><a href="tel:{{ household.contact_number }}">{{ household.contact_number }}</a></dd>
+    <dt>Address</dt><dd>{{ household.address }}</dd>
+    <dt>Location</dt><dd>{{ household.location or "—" }}</dd>
+    <dt>Added on</dt><dd>{{ household.created_at | datetime }}</dd>
+  </dl>
+</section>
+
+<section class="card">
+  <h2>Visits ({{ household.visits | length }})</h2>
+  {{ ui.visit_table(household.visits, show_household=False, show_update=True, empty="No visits recorded for this household yet.", action_url="/visits/new?household_id=%d" % household.id, action_text="Schedule the first visit") }}
+</section>
+
+<form method="post" action="/households/{{ household.id }}/delete"
+      onsubmit="return confirm('Delete this household and all of its visits? This cannot be undone.');">
+  <button type="submit" class="button danger">Delete household</button>
+</form>
+{% endblock %}

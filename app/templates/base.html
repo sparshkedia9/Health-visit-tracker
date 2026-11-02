@@ -4,21 +4,60 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Home{% endblock %} · Visit Tracker</title>
-  <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+  <!-- Plain "/static/..." paths work no matter which address the site is opened from -->
+  <link rel="stylesheet" href="/static/style.css">
+  <script>
+    // If the sidebar was collapsed on the last page, collapse it again straight away
+    // (this runs before the page is drawn, so the sidebar doesn't "jump").
+    try {
+      if (localStorage.getItem("sidebarCollapsed") === "yes") {
+        document.documentElement.classList.add("sidebar-collapsed");
+      }
+    } catch (error) {}
+  </script>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="/">Health Visit Tracker</a>
-    <nav class="nav">
-      <a href="/" class="{{ 'active' if active == 'dashboard' }}">Dashboard</a>
-      <a href="/households" class="{{ 'active' if active == 'households' }}">Households</a>
-      <a href="/visits" class="{{ 'active' if active == 'visits' }}">Visits</a>
-      <a href="/reports" class="{{ 'active' if active == 'reports' }}">Reports</a>
-    </nav>
-  </header>
+  <!-- ===== Sidebar navigation (shared by every page) ===== -->
+  <aside class="sidebar">
+    <a class="sidebar-brand" href="/">
+      <span class="brand-icon"><i data-lucide="heart-pulse" class="icon"></i></span>
+      <span class="nav-label">Health Visit Tracker</span>
+    </a>
 
-  <main class="container">
+    <nav class="sidebar-nav">
+      <!-- data-tooltip is the text shown when the sidebar is collapsed -->
+      <a href="/" class="nav-link {{ 'active' if active == 'dashboard' }}" data-tooltip="Dashboard" aria-label="Dashboard">
+        <i data-lucide="layout-dashboard" class="icon"></i>
+        <span class="nav-label">Dashboard</span>
+      </a>
+      <a href="/households" class="nav-link {{ 'active' if active == 'households' }}" data-tooltip="Households" aria-label="Households">
+        <i data-lucide="users" class="icon"></i>
+        <span class="nav-label">Households</span>
+      </a>
+      <a href="/visits" class="nav-link {{ 'active' if active == 'visits' }}" data-tooltip="Visits" aria-label="Visits">
+        <i data-lucide="calendar-check" class="icon"></i>
+        <span class="nav-label">Visits</span>
+      </a>
+      <a href="/reports" class="nav-link {{ 'active' if active == 'reports' }}" data-tooltip="Reports" aria-label="Reports">
+        <i data-lucide="file-text" class="icon"></i>
+        <span class="nav-label">Reports</span>
+      </a>
+    </nav>
+
+    <!-- Collapse / expand button. Only one of the two icons is visible at a time (see style.css). -->
+    <button type="button" id="sidebar-toggle" class="sidebar-toggle" data-tooltip="Expand menu" aria-label="Collapse or expand menu">
+      <i data-lucide="panel-left-close" class="icon icon-collapse"></i>
+      <i data-lucide="panel-left-open" class="icon icon-expand"></i>
+      <span class="nav-label">Collapse menu</span>
+    </button>
+  </aside>
+
+  <!-- ===== Page content ===== -->
+  <main class="main-content">
     {% block content %}{% endblock %}
   </main>
+
+  <script src="/static/vendor/lucide.min.js"></script>
+  <script src="/static/app.js"></script>
 </body>
 </html>

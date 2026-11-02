@@ -22,11 +22,11 @@
       <tbody>
         {% for household, visit_count in rows %}
         <tr>
-          <td><a href="/households/{{ household.id }}">{{ household.name }}</a></td>
+          <td class="cell-wrap"><a href="/households/{{ household.id }}">{{ household.name }}</a></td>
           <td>{{ household.contact_number }}</td>
-          <td>{{ household.location or "—" }}</td>
+          <td class="cell-wrap">{{ household.location or "—" }}</td>
           <td>{{ visit_count }}</td>
-          <td class="actions"><a href="/visits/new?household_id={{ household.id }}">Schedule visit</a></td>
+          <td class="actions"><a class="button small" href="/visits/new?household_id={{ household.id }}">Schedule visit</a></td>
         </tr>
         {% endfor %}
       </tbody>

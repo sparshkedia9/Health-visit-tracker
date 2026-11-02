@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui %}
+{% set editing = visit is not none %}
+{% block title %}{{ "Edit visit" if editing else "Schedule visit" }}{% endblock %}
+{% block content %}
+{% if editing %}
+<a class="back-link" href="/visits/{{ visit.id }}">← Visit to {{ visit.household.name }}</a>
+{% else %}
+<a class="back-link" href="/visits">← All visits</a>
+{% endif %}
+<div class="page-header">
+  <h1>{{ "Edit visit" if editing else "Schedule visit" }}</h1>
+</div>
+
+{% if not households %}
+<section class="card">
+  <p class="empty">You need to add a household before scheduling a visit. <a href="/households/new">Add a household</a>.</p>
+</section>
+{% else %}
+<form class="card form" method="post" action="{{ '/visits/%d/edit' % visit.id if editing else '/visits/new' }}">
+  {% if errors %}<p class="form-error">Please fix the highlighted fields.</p>{% endif %}
+  {{ ui.field_error(errors, "form") }}
+
+  <fieldset>
+    <legend>Visit details</legend>
+
+    <label for="household_id">Household</label>
+    <select id="household_id" name="household_id" required>
+      <option value="">Choose a household…</option>
+      {% for h in households %}
+      <option value="{{ h.id }}" {{ 'selected' if form.household_id == h.id | string }}>{{ h.name }}{% if h.location %} — {{ h.location }}{% endif %}</option>
+      {% endfor %}
+    </select>
+    {{ ui.field_error(errors, "household_id") }}
+
+    <div class="row">
+      <div>
+        <label for="scheduled_at">Date and time</label>
+        <input id="scheduled_at" name="scheduled_at" type="datetime-local" value="{{ form.scheduled_at }}" required>
+        {{ ui.field_error(errors, "scheduled_at") }}
+      </div>
+      <div>
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          {% for s in visit_statuses %}
+          <option value="{{ s }}" {{ 'selected' if form.status == s }}>{{ s | capitalize }}</option>
+          {% endfor %}
+        </select>
+        {{ ui.field_error(errors, "status") }}
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Checklist <span class="muted">(tick what was done during the visit)</span></legend>
+    <div class="checklist">
+      {% for item in checklist_items %}
+      <label class="check">
+        <input type="checkbox" name="checklist" value="{{ item }}" {{ 'checked' if item in form.checklist }}>
+        {{ item }}
+      </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Notes</legend>
+    <label for="notes" class="visually-hidden">Notes</label>
+    <textarea id="notes" name="notes" rows="5" maxlength="5000" placeholder="Observations, health concerns, advice given…">{{ form.notes }}</textarea>
+    {{ ui.field_error(errors, "notes") }}
+  </fieldset>
+
+  <fieldset>
+    <legend>Follow-up <span class="muted">(optional)</span></legend>
+    <div class="row">
+      <div>
+        <label for="follow_up_date">Follow-up date</label>
+        <input id="follow_up_date" name="follow_up_date" type="date" value="{{ form.follow_up_date }}">
+        {{ ui.field_error(errors, "follow_up_date") }}
+      </div>
+      <div>
+        <label for="follow_up_status">Follow-up status</label>
+        <select id="follow_up_status" name="follow_up_status">
+          <option value="pending" {{ 'selected' if form.follow_up_status != 'completed' }}>Pending</option>
+          <option value="completed" {{ 'selected' if form.follow_up_status == 'completed' }}>Completed</option>
+        </select>
+      </div>
+    </div>
+  </fieldset>
+
+  <div class="form-actions">
+    <button type="submit" class="button">{{ "Save changes" if editing else "Schedule visit" }}</button>
+    <a href="{{ '/visits/%d' % visit.id if editing else '/visits' }}">Cancel</a>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

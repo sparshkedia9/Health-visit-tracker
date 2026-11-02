@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -35,4 +36,16 @@ async def show_error_page(request: Request, exc: StarletteHTTPException):
         "error.html",
         {"status_code": exc.status_code, "message": exc.detail},
         status_code=exc.status_code,
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def show_invalid_url_page(request: Request, exc: RequestValidationError):
+    """A URL like /visits/abc (text where an ID number should be) is treated as a page
+    that doesn't exist, instead of showing FastAPI's raw JSON error."""
+    return templates.TemplateResponse(
+        request,
+        "error.html",
+        {"status_code": 404, "message": "Page not found."},
+        status_code=404,
     )

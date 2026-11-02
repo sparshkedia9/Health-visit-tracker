@@ -8,7 +8,8 @@
 </div>
 
 <nav class="tabs" aria-label="Filter by status">
-  <a href="/visits" class="{{ 'active' if not status }}">All</a>
+  {# "All" is active when no (or an unknown) status is chosen, which is when the list shows every visit #}
+  <a href="/visits" class="{{ 'active' if status not in visit_statuses }}">All</a>
   {% for s in visit_statuses %}
   <a href="/visits?status={{ s }}" class="{{ 'active' if status == s }}">{{ s | capitalize }}</a>
   {% endfor %}

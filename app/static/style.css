@@ -5,9 +5,16 @@
   --danger: #b91c1c;
   --text: #1f2937;
   --muted: #6b7280;
+  --primary-light: #f0fdfa;   /* very light teal, for hover and active backgrounds */
+  --primary-soft: #ccfbf1;    /* light teal, for the welcome banner */
   --border: #e5e7eb;
-  --background: #f3f4f6;
+  --background: #f4f6f8;
   --card: #ffffff;
+  --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+
+  /* Sidebar widths (expanded and collapsed) */
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 72px;
 }
 
 /* ---------- Basics ---------- */
@@ -22,6 +29,8 @@ body {
   line-height: 1.5;
   color: var(--text);
   background: var(--background);
+  /* Break very long words or links (e.g. in notes) instead of letting them stick out of their card */
+  overflow-wrap: break-word;
 }
 
 a {
@@ -30,7 +39,7 @@ a {
 
 h1 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.6rem;
 }
 
 h2 {
@@ -38,10 +47,19 @@ h2 {
   font-size: 1.1rem;
 }
 
-.container {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 16px;
+/* All Lucide icons get the "icon" class (see base.html). */
+.icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* The area to the right of the sidebar. Its left margin matches the sidebar width. */
+.main-content {
+  max-width: 1320px;
+  margin-left: var(--sidebar-width);
+  padding: 28px 32px;
+  transition: margin-left 0.2s ease;
 }
 
 .muted {
@@ -64,39 +82,128 @@ h2 {
   text-decoration: none;
 }
 
-/* ---------- Top navigation ---------- */
-.topbar {
+/* ---------- Sidebar navigation ---------- */
+/* The sidebar stays fixed on the left while the page scrolls. */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 10;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 8px;
-  padding: 12px 16px;
-  background: var(--primary);
+  width: var(--sidebar-width);
+  padding: 20px 12px;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  transition: width 0.2s ease;
 }
 
-.brand {
-  color: #fff;
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.nav {
+.sidebar-brand {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.nav a {
-  color: #fff;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 6px 20px;
+  color: var(--text);
+  font-weight: 700;
+  font-size: 1.05rem;
   text-decoration: none;
-  padding: 10px 12px;
-  border-radius: 6px;
+  white-space: nowrap;
 }
 
-.nav a.active,
-.nav a:hover {
-  background: var(--primary-dark);
+/* The teal square with the heart icon */
+.brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;   /* pushes the collapse button to the bottom */
+}
+
+/* Navigation links and the collapse button share the same look. */
+.nav-link,
+.sidebar-toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--muted);
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nav-link:hover,
+.sidebar-toggle:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+/* The page you are currently on */
+.nav-link.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.sidebar-toggle {
+  width: 100%;
+  border: none;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+
+/* Show the "close" icon normally and the "open" icon when collapsed. */
+.icon-expand {
+  display: none;
+}
+
+/* ----- Collapsed sidebar -----
+   app.js adds the "sidebar-collapsed" class to the <html> tag when the toggle is clicked. */
+.sidebar-collapsed .sidebar {
+  width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-collapsed .main-content {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+.sidebar-collapsed .nav-label,
+.sidebar-collapsed .icon-collapse {
+  display: none;
+}
+
+.sidebar-collapsed .icon-expand {
+  display: block;
+}
+
+/* Tooltip: when collapsed, hovering an icon shows its name (from data-tooltip) to the right. */
+.sidebar-collapsed .nav-link:hover::after,
+.sidebar-collapsed .sidebar-toggle:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 100%;
+  margin-left: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--text);
+  color: #fff;
+  font-size: 0.85rem;
+  pointer-events: none;
 }
 
 /* ---------- Page header ---------- */
@@ -106,7 +213,7 @@ h2 {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .page-header p {
@@ -123,16 +230,23 @@ h2 {
   gap: 8px;
 }
 
+/* Space between the follow-up details and its buttons on the visit page */
+.inline-actions {
+  margin-top: 16px;
+}
+
 /* ---------- Buttons ---------- */
 /* 44px is the recommended minimum height for something you tap with a finger. */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;   /* space between an icon and the button text */
   min-height: 44px;
   padding: 8px 16px;
   border: 1px solid var(--primary);
-  border-radius: 6px;
+  border-radius: 8px;
+  font-weight: 500;
   background: var(--primary);
   color: #fff;
   font: inherit;
@@ -150,7 +264,23 @@ h2 {
 }
 
 .button.secondary:hover {
-  background: #f0fdfa;
+  background: var(--primary-light);
+}
+
+.button .icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* A smaller button, e.g. "Schedule a visit" next to an empty-list message */
+.button.small {
+  min-height: 32px;
+  padding: 4px 12px;
+  font-size: 0.875rem;
+}
+
+.empty .button {
+  margin-left: 8px;
 }
 
 .button.danger {
@@ -163,9 +293,10 @@ h2 {
 .card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 16px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  margin-bottom: 20px;
 }
 
 .error-page {
@@ -201,6 +332,131 @@ h2 {
   font-size: 0.9rem;
 }
 
+/* ---------- Dashboard ---------- */
+/* Welcome banner: text on the left, illustration on the right */
+.welcome-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 28px;
+  margin-bottom: 20px;
+  border-radius: 12px;
+  background: var(--primary-light);
+  border: 1px solid var(--primary-soft);
+}
+
+.welcome-banner h2 {
+  margin: 0 0 4px;
+  font-size: 1.3rem;
+  color: var(--primary-dark);
+}
+
+.welcome-banner p {
+  margin: 0;
+  max-width: 560px;
+  color: var(--muted);
+}
+
+.welcome-illustration {
+  width: 150px;
+  height: 100px;
+  flex-shrink: 0;
+}
+
+/* Statistics cards: 5 in a row on wide screens. On smaller screens the cards
+   move onto a second row instead of being pushed off the edge of the page. */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease;
+}
+
+/* Only the clickable cards (links) react to the mouse */
+a.stat-card:hover {
+  border-color: var(--primary);
+}
+
+.stat-card .stat-value,
+.stat-card .stat-label {
+  display: block;
+}
+
+.stat-card .stat-value {
+  font-size: 1.9rem;
+  line-height: 1.1;
+}
+
+.stat-card .stat-label {
+  font-size: 0.85rem;
+}
+
+/* Round coloured background behind each stat icon */
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 10px;
+}
+
+.stat-icon.teal  { background: #ccfbf1; color: #0f766e; }
+.stat-icon.blue  { background: #dbeafe; color: #1e40af; }
+.stat-icon.green { background: #dcfce7; color: #166534; }
+.stat-icon.red   { background: #fee2e2; color: #991b1b; }
+.stat-icon.amber { background: #fef3c7; color: #92400e; }
+
+/* Section headings with an icon in front */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-title .icon {
+  color: var(--primary);
+}
+
+/* Upcoming visits (two thirds) next to pending follow-ups (one third) */
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* min-width: 0 lets wide tables scroll inside the card instead of stretching the column */
+.dashboard-columns > .card {
+  min-width: 0;
+}
+
+/* On smaller laptop screens there isn't room for the visits table next to the
+   follow-ups list, so show them one below the other. */
+@media (max-width: 1365px) {
+  .dashboard-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ---------- Tables ---------- */
 /* The wrapper lets wide tables scroll sideways on phones instead of breaking the page. */
 .table-wrap {
@@ -220,10 +476,28 @@ td {
   white-space: nowrap;
 }
 
+/* Cells with names or long text (e.g. household name) are allowed to wrap,
+   so one long name can't push the other columns off the screen. */
+td.cell-wrap {
+  white-space: normal;
+  min-width: 160px;
+}
+
 th {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Light highlight on the row under the mouse */
+tbody tr:hover td {
+  background: #f9fafb;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
 }
 
 td.actions {
@@ -239,10 +513,23 @@ td.actions a:not(.button) {
 /* ---------- Status badges ---------- */
 .badge {
   display: inline-block;
-  padding: 2px 8px;
+  padding: 2px 10px;
   border-radius: 999px;
   font-size: 0.8rem;
   font-weight: 600;
+  white-space: nowrap;   /* keep the dot and the word together */
+}
+
+/* Small coloured dot at the start of each badge (uses the badge's text colour) */
+.badge::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  vertical-align: middle;
 }
 
 .badge-scheduled { background: #dbeafe; color: #1e40af; }
@@ -261,10 +548,29 @@ td.actions a:not(.button) {
 .simple-list li {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 8px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--border);
+}
+
+.simple-list li:last-child {
+  border-bottom: none;
+}
+
+.simple-list a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.simple-list a:hover {
+  text-decoration: underline;
+}
+
+.follow-up-info {
+  color: var(--muted);
+  font-size: 0.9rem;
 }
 
 .details {
@@ -451,6 +757,11 @@ legend {
     gap: 16px;
   }
 
+  /* Lets long text wrap inside each column instead of making the column wider */
+  .two-col > * {
+    min-width: 0;
+  }
+
   .row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -462,7 +773,29 @@ legend {
     grid-template-columns: 1fr 1fr;
   }
 
+  /* Each filter gets at least 170px; if they don't all fit, they wrap onto a new row
+     instead of squashing the dropdowns. */
   .filters {
-    grid-template-columns: repeat(4, 1fr) auto;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  }
+}
+
+/* ---------- Smaller screens ----------
+   The project is designed for desktop. Below 1200px the full-width sidebar leaves too
+   little room for the visit tables (their buttons get hidden), so the sidebar is
+   always shown in its icon-only (collapsed) form. */
+@media (max-width: 1200px) {
+  .sidebar {
+    width: var(--sidebar-collapsed-width);
+  }
+
+  .main-content {
+    margin-left: var(--sidebar-collapsed-width);
+    padding: 20px 16px;
+  }
+
+  .nav-label,
+  .sidebar-toggle {
+    display: none;
   }
 }

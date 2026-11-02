@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% import "macros.html" as ui %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Dashboard</h1>
+    <p class="muted" id="today-label"></p>
+  </div>
+  <div class="header-actions">
+    <a class="button secondary" href="/households/new"><i data-lucide="user-plus" class="icon"></i> Add household</a>
+    <a class="button" href="/visits/new"><i data-lucide="calendar-plus" class="icon"></i> Schedule visit</a>
+  </div>
+</div>
+
+<!-- ===== Welcome banner ===== -->
+<section class="welcome-banner">
+  <div>
+    <!-- "Good Morning / Afternoon / Evening" is filled in by app.js -->
+    <h2 id="greeting">Welcome back</h2>
+    <p>Here is today's overview of household visits and follow-ups. Every visit helps keep a family healthy.</p>
+  </div>
+
+  <!-- Simple healthcare illustration: a clipboard with a medical cross and a heartbeat line -->
+  <svg class="welcome-illustration" viewBox="0 0 160 110" aria-hidden="true">
+    <circle cx="80" cy="55" r="52" fill="#ccfbf1" />
+    <rect x="52" y="20" width="56" height="72" rx="8" fill="#ffffff" stroke="#0f766e" stroke-width="3" />
+    <rect x="66" y="13" width="28" height="14" rx="4" fill="#0f766e" />
+    <rect x="75" y="36" width="10" height="26" rx="2" fill="#14b8a6" />
+    <rect x="67" y="44" width="26" height="10" rx="2" fill="#14b8a6" />
+    <polyline points="58,76 70,76 75,68 81,84 86,72 102,72" fill="none" stroke="#0f766e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+    <path d="M128 30 c-4 -6 -14 -3 -12 4 c1 4 7 8 12 12 c5 -4 11 -8 12 -12 c2 -7 -8 -10 -12 -4 z" fill="#f87171" />
+    <circle cx="30" cy="80" r="5" fill="#5eead4" />
+    <circle cx="138" cy="84" r="3" fill="#5eead4" />
+  </svg>
+</section>
+
+<!-- ===== Statistics cards (numbers come from the database via the "stats" variable) ===== -->
+<section class="stat-cards">
+  <a class="stat-card" href="/households">
+    <span class="stat-icon teal"><i data-lucide="users" class="icon"></i></span>
+    <span>
+      <span class="stat-value">{{ stats.households }}</span>
+      <span class="stat-label">Total households</span>
+    </span>
+  </a>
+  <div class="stat-card">
+    <span class="stat-icon blue"><i data-lucide="calendar-days" class="icon"></i></span>
+    <span>
+      <span class="stat-value">{{ stats.today }}</span>
+      <span class="stat-label">Visits today</span>
+    </span>
+  </div>
+  <a class="stat-card" href="/visits?status=completed">
+    <span class="stat-icon green"><i data-lucide="circle-check" class="icon"></i></span>
+    <span>
+      <span class="stat-value">{{ stats.completed }}</span>
+      <span class="stat-label">Completed visits</span>
+    </span>
+  </a>
+  <a class="stat-card" href="/visits?status=missed">
+    <span class="stat-icon red"><i data-lucide="circle-x" class="icon"></i></span>
+    <span>
+      <span class="stat-value">{{ stats.missed }}</span>
+      <span class="stat-label">Missed visits</span>
+    </span>
+  </a>
+  <div class="stat-card">
+    <span class="stat-icon amber"><i data-lucide="bell-ring" class="icon"></i></span>
+    <span>
+      <span class="stat-value">{{ stats.pending_follow_ups }}</span>
+      <span class="stat-label">Pending follow-ups</span>
+    </span>
+  </div>
+</section>
+
+<!-- ===== Today's visits ===== -->
+<section class="card">
+  <h2 class="section-title"><i data-lucide="stethoscope" class="icon"></i> Today's visits</h2>
+  {{ ui.visit_table(todays_visits, show_update=True, empty="No visits scheduled for today.", action_url="/visits/new", action_text="Schedule a visit") }}
+</section>
+
+<!-- ===== Upcoming visits and pending follow-ups, side by side ===== -->
+<div class="dashboard-columns">
+  <section class="card">
+    <h2 class="section-title"><i data-lucide="calendar-clock" class="icon"></i> Upcoming visits</h2>
+    {{ ui.visit_table(upcoming_visits, empty="No upcoming visits scheduled.", action_url="/visits/new", action_text="Schedule a visit") }}
+  </section>
+
+  <section class="card">
+    <h2 class="section-title"><i data-lucide="clipboard-list" class="icon"></i> Pending follow-ups</h2>
+    {% if follow_ups %}
+    <ul class="simple-list">
+      {% for visit in follow_ups %}
+      <li>
+        <a href="/visits/{{ visit.id }}">{{ visit.household.name }}</a>
+        <span class="follow-up-info">{{ visit.follow_up_date | date }} {{ ui.badge(visit.follow_up_state) }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">No pending follow-ups.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

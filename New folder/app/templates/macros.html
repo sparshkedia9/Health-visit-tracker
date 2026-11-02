@@ -1,0 +1,57 @@
+{# Reusable bits of HTML. Import with: {% import "macros.html" as ui %} #}
+
+{% macro badge(status) -%}
+  {% if status %}<span class="badge badge-{{ status }}">{{ status | capitalize }}</span>{% else %}<span class="muted">—</span>{% endif %}
+{%- endmacro %}
+
+{% macro field_error(errors, name) -%}
+  {% if errors.get(name) %}<p class="field-error">{{ errors[name] }}</p>{% endif %}
+{%- endmacro %}
+
+{# Message for an empty list, with an optional link to the next action. #}
+{% macro empty_message(text, action_url=None, action_text=None) -%}
+  <p class="empty">{{ text }}{% if action_url %} <a href="{{ action_url }}">{{ action_text }}</a>{% endif %}</p>
+{%- endmacro %}
+
+{# A compact table of visits, used on the dashboard, household page and lists.
+   show_update adds an "Update" link on scheduled visits, for recording what happened. #}
+{% macro visit_table(visits, show_household=True, show_update=False, empty="No visits yet.", action_url=None, action_text=None) -%}
+  {% if visits %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>When</th>
+          {% if show_household %}<th>Household</th>{% endif %}
+          <th>Status</th>
+          <th>Follow-up</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for visit in visits %}
+        <tr>
+          <td>{{ visit.scheduled_at | datetime }}</td>
+          {% if show_household %}
+          <td>
+            <a href="/households/{{ visit.household.id }}">{{ visit.household.name }}</a>
+            {% if visit.household.location %}<br><span class="muted small">{{ visit.household.location }}</span>{% endif %}
+          </td>
+          {% endif %}
+          <td>{{ badge(visit.status) }}</td>
+          <td>
+            {% if visit.follow_up_date %}{{ visit.follow_up_date | date }} {{ badge(visit.follow_up_state) }}{% else %}<span class="muted">—</span>{% endif %}
+          </td>
+          <td class="actions">
+            {% if show_update and visit.status == "scheduled" %}<a href="/visits/{{ visit.id }}/edit">Update</a>{% endif %}
+            <a class="button secondary" href="/visits/{{ visit.id }}">Open</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  {{ empty_message(empty, action_url, action_text) }}
+  {% endif %}
+{%- endmacro %}

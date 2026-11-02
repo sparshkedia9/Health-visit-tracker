@@ -10,7 +10,7 @@
 
 {# Message for an empty list, with an optional link to the next action. #}
 {% macro empty_message(text, action_url=None, action_text=None) -%}
-  <p class="empty">{{ text }}{% if action_url %} <a href="{{ action_url }}">{{ action_text }}</a>{% endif %}</p>
+  <p class="empty">{{ text }}{% if action_url %} <a class="button small" href="{{ action_url }}">{{ action_text }}</a>{% endif %}</p>
 {%- endmacro %}
 
 {# A compact table of visits, used on the dashboard, household page and lists.
@@ -33,7 +33,7 @@
         <tr>
           <td>{{ visit.scheduled_at | datetime }}</td>
           {% if show_household %}
-          <td>
+          <td class="cell-wrap">
             <a href="/households/{{ visit.household.id }}">{{ visit.household.name }}</a>
             {% if visit.household.location %}<br><span class="muted small">{{ visit.household.location }}</span>{% endif %}
           </td>
